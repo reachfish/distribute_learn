@@ -85,6 +85,7 @@ struct Group {
 		return group;
 	}
 
+	void RunUntilDone();
 	void Start();
 	void Stop();
 	void Join();

@@ -1,3 +1,8 @@
+COPTS = [
+	"-std=c++11",
+	"-g",
+]
+
 cc_test(
 	name = "vertex_color",
 	srcs = glob([
@@ -7,9 +12,6 @@ cc_test(
 		"//src:vertex_color",
 		"@gtest//:gtest_main",
 	],
-	copts = [
-		"-std=c++11",
-		"-g",
-	],
+	copts = COPTS,
 )
 

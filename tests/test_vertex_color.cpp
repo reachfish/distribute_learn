@@ -13,18 +13,13 @@ TEST(TestVC, TestStar) {
 	for (const auto& node : group->nodes) {
 		((vertex_color::VCNode*)node.second.get())->InitNeigh(edges);
 	}
-	group->Start();
-	group->WaitDone();
+	group->RunUntilDone();
 	std::map<base::node_ip_t, int32_t> colors;
 	for (const auto& node : group->nodes) {
 		vertex_color::VCNode* vcnode = (vertex_color::VCNode*)node.second.get();
 		std::cout << "ip=" << vcnode->ip() << ", color=" << vcnode->color() << std::endl;
 		colors[vcnode->ip()] = vcnode->color();
 	}
-
-	group->Stop();
-	group->Join();
-
 	for (base::node_ip_t ip=1; ip<=5; ip++) {
 		if (ip == 3) {
 			EXPECT_NE(colors[ip], colors[1]);

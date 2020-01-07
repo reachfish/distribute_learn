@@ -70,6 +70,13 @@ void Node::WaitFor(PredictFunc_t func) {
 	}
 }
 
+void Group::RunUntilDone() {
+	Start();
+	WaitDone();
+	Stop();
+	Join();
+}
+
 void Group::Start() {
 	for (const auto& node : nodes) {
 		node.second->Start();

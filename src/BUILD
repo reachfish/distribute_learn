@@ -1,3 +1,16 @@
+COPTS = [
+	"-std=c++11",
+	"-g",
+]
+
+VISIBILITY = [
+	"//visibility:public",
+]
+
+INCLUDES = [
+	".",
+]
+
 cc_library(
 	name = "base",
 	srcs = glob([
@@ -9,11 +22,8 @@ cc_library(
 	linkopts = [
 		"-lpthread",
 	],
-	copts = [
-		"-std=c++11",
-		"-g",
-	],
-	visibility = ["//visibility:public"],
+	copts = COPTS,
+	visibility = VISIBILITY,
 )
 
 cc_library(
@@ -27,13 +37,8 @@ cc_library(
 	deps = [
 		":base",
 	],
-	copts = [
-		"-std=c++11",
-		"-g",
-	],
-	includes = [
-		".",
-	],
-	visibility = ["//visibility:public"],
+	copts = COPTS,
+	includes = INCLUDES,
+	visibility = VISIBILITY,
 )
 
