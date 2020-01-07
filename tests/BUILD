@@ -1,20 +1,15 @@
-
-cc_library(
+cc_test(
 	name = "vertex_color",
 	srcs = glob([
-		"*.cpp",
-	]),
-	hdrs = glob([
-		"*.h",
+		"test_vertex_color.cpp",
 	]),
 	deps = [
-		"//base:base",
+		"//vertex_color:vertex_color",
 		"@gtest//:gtest_main",
 	],
 	copts = [
 		"-std=c++11",
 		"-g",
 	],
-	visibility = ["//visibility:public"],
 )
 
