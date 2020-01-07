@@ -2,38 +2,58 @@
 
 namespace base {
 
-Node::Node(node_id_t id, Group* group)
-	: id_(id), group_(group) {
-}
-
 Node::~Node() {
 	Join();
 }
 
-bool Node::SendMessage(node_id_t id, std::unique_ptr<Message>&& msg) {
-	return group_->nodes[id]->RecvMessage(std::move(msg));
-}
-
-bool Node::RecvMessage(std::unique_ptr<Message>&& msg) {
-	std::unique_lock<std::mutex> lock(mutex_);
-	msgs_.push(std::move(msg));
-	cond_.notify_one();
+bool Node::SendMessage(node_ip_t ip, std::unique_ptr<Message>&& msg) {
+	msg->from_ip = ip_;
+	{
+		auto& node = group_->nodes[ip];
+		std::unique_lock<std::mutex> lock(node->mutex_);
+		node->msgs_.push(std::move(msg));
+		node->cond_.notify_one();
+	}
 	return true;
 }
 
-void Node::Start(RunFunc_t func) {
-	thread_ = std::thread(func, this);
+void Node::HandleMessage(const std::unique_ptr<Message>& msg) {
+	auto handler = handlers_[msg->uri()];
+	assert(handler != nullptr);
+	(this->*handler)(msg.get());
+}
+
+void Node::Start() {
+	thread_ = std::move(std::thread(&Node::Run, this));
+}
+
+void Node::Stop() {
+	std::unique_lock<std::mutex> lock(mutex_);
+	stop_ = true;
+	cond_.notify_one();
 }
 
 void Node::Join() {
-	thread_.join();
+	if (thread_.joinable()) {
+		thread_.join();
+	}
 }
 
-void Node::HandleWait(PredictFunc_t func) {
-	for (;;) {
+void Node::SetDone() {
+	std::unique_lock<std::mutex> lock(group_->mutex);
+	done_ = true;
+	group_->cond.notify_one();
+}
+
+void Node::WaitFor(PredictFunc_t func) {
+	auto is_end = [this, func]() -> bool {
+		return stop_ || (func != nullptr && func());
+	};
+
+	for (;!is_end();) {
 		{
 			std::unique_lock<std::mutex> lock(mutex_);
-			cond_.wait(lock, [this] { return !msgs_.empty(); });
+			cond_.wait(lock, [this] { return !msgs_.empty() || stop_; });
 		}
 
 		do {
@@ -44,19 +64,41 @@ void Node::HandleWait(PredictFunc_t func) {
 				msgs_.pop();
 			}
 			if (msg) {
-				Handle(msg);
+				HandleMessage(msg);
 			}
-			if (func != nullptr && func()) {
-				return;
-			}
-		} while(!msgs_.empty());
+		} while(!msgs_.empty() && !is_end());
+	}
+}
+
+void Group::Start() {
+	for (const auto& node : nodes) {
+		node.second->Start();
+	}
+}
+
+void Group::Stop() {
+	for (const auto& node : nodes) {
+		node.second->Stop();
 	}
 }
 
 void Group::Join() {
-	for (auto& node : nodes) {
-		node->Join();
+	for (const auto& node : nodes) {
+		node.second->Join();
 	}
 }
 
+void Group::WaitDone() {
+	std::unique_lock<std::mutex> lock(mutex);
+	cond.wait(lock, [this] {
+		for (const auto& node : nodes) {
+			if (!node.second->is_done()) {
+				return false;
+			}
+		}
+		return true;
+	});
 }
+
+}
+

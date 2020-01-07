@@ -6,8 +6,12 @@ cc_library(
 	hdrs = glob([
 		"*.h",
 	]),
+	linkopts = [
+		"-lpthread",
+	],
 	copts = [
 		"-std=c++11",
+		"-g",
 	],
 	visibility = ["//visibility:public"],
 )
