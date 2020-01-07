@@ -9,8 +9,8 @@
 #include <mutex>
 #include <condition_variable>
 
-#define REGISTER_HANDLER(uri, handler)   \
-	assert(base::Node::handlers_.count(uri) == 0);  \
+#define REGISTER_HANDLER(uri, handler)                           \
+	assert(base::Node::handlers_.count(uri) == 0);               \
     base::Node::handlers_[uri] = (base::Node::Handler_t)handler;
 
 namespace base {
@@ -19,7 +19,7 @@ class Node;
 struct Group;
 typedef uint32_t node_id_t;
 typedef uint64_t node_ip_t;
-typedef uint32_t uri_t;
+typedef std::string uri_t;
 typedef std::function<bool()> PredictFunc_t;
 
 const node_id_t INVALID_NODE_ID = (node_id_t)-1;

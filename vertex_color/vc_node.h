@@ -10,22 +10,15 @@ using base::node_id_t;
 
 const int32_t INVALID_COLOR = -1;
 
-enum URI {
-	GET_ID        = 1,
-	GET_ID_RES    = 2,
-	GET_COLOR     = 3,
-	GET_COLOR_RES = 4
-};
-
 struct GetId : public base::Message {
 	virtual uri_t uri() override {
-		return URI::GET_ID;
+		return "GetId";
 	}
 };
 
 struct GetIdRes : public base::Message {
 	virtual uri_t uri() override {
-		return URI::GET_ID_RES;
+		return "GetIdRes";
 	}
 
 	node_ip_t  ip;
@@ -34,7 +27,7 @@ struct GetIdRes : public base::Message {
 
 struct GetColor : public base::Message {
 	virtual uri_t uri() override {
-		return URI::GET_COLOR;
+		return "GetColor";
 	}
 
 	node_ip_t  ip;
@@ -42,7 +35,7 @@ struct GetColor : public base::Message {
 
 struct GetColorRes : public base::Message {
 	virtual uri_t uri() override {
-		return URI::GET_COLOR_RES;
+		return "GetColorRes";
 	}
 
 	node_ip_t   ip;
