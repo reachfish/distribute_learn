@@ -1,6 +1,6 @@
 #include <map>
 #include <gtest/gtest.h>
-#include "vertex_color/vc_node.h"
+#include "src/vertex_color/vc_node.h"
 
 TEST(TestVC, TestStar) {
 	std::vector<vertex_color::Edge> edges{
